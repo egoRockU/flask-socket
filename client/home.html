@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Page</title>
+</head>
+<body>
+    <h1>HELLLLOOOOO</h1>
+
+    <img id="video-frame"></img>
+
+    <input type="text" id="textInput" placeholder="Enter text..." required>
+    <button type="submit" onclick="sendText()">Submit</button>
+
+    <button onclick="clicked()">click me</button>
+
+    <div id="logs">
+    </div>
+
+
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script>
+        const socket = io('http://localhost:5000', 
+        {
+            cors: {origin: 'http://localhost:5500'}
+        })
+
+        socket.on('connect', () => {
+            console.log('connected to the server')
+        })
+
+        socket.on('receive_message', (data) => {
+            const logs = document.getElementById("logs")
+            let header3 = document.createElement("h3")
+            header3.textContent = data
+            logs.appendChild(header3)
+        })
+
+        socket.on('live_video', (data) => {
+            const imgElement = document.getElementById('video-frame');
+            imgElement.src = `data:image/jpeg;base64,${data}`;
+        })
+
+        socket.on('test', (data)=>{
+            console.log("testing data: ", data)
+        })
+
+        function sendText(){
+            const inputElement = document.getElementById('textInput')
+            const text = inputElement.value.trim();
+
+            if (text) {
+                socket.emit('message', text)
+                inputElement.value = ''
+            }
+        }
+
+        function clicked(){
+            fetch('http://localhost:5000/click')
+            .then(data=>{
+                console.log("Success:", data)
+            })
+        }
+
+    </script>
+</body>
+</html>
